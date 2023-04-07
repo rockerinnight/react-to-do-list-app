@@ -28,14 +28,14 @@ export default class ToDoItem extends Component {
               className='icon icon__remove'
               title='Remove'
               tabIndex='0'
-              onClick={!isEditing ? onRemove(id) : null}
+              onClick={!isEditing ? onRemove(id) : undefined}
             ></div>
             <div className='icon icon__edit' title='Edit' tabIndex='0' onClick={onEdit(id)}></div>
             <div
               className='icon icon__complete'
               title='Complete'
               tabIndex='0'
-              onClick={!isEditing ? onComplete(id) : null}
+              onClick={!isEditing ? onComplete(id) : undefined}
             ></div>
           </div>
         </div>

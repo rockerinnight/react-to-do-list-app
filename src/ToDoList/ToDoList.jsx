@@ -2,8 +2,7 @@ import React, { Component, createRef } from 'react'
 import './ToDoList.scss'
 
 import ToDoInput from './ToDoInput/ToDoInput.jsx'
-import ToDoDone from './ToDoStatus/ToDoDone.jsx'
-import ToDoOnProcess from './ToDoStatus/ToDoOnProcess.jsx'
+import ToDoStatus from './ToDoStatus/ToDoStatus.jsx'
 import ToDoItem from './ToDoItem/ToDoItem.jsx'
 
 export default class ToDoList extends Component {
@@ -24,16 +23,26 @@ export default class ToDoList extends Component {
           id: 2,
           title: 'Daily reporting 📝',
           isDone: false
+        },
+        {
+          id: 3,
+          title: 'Coding! 👨‍💻',
+          isDone: false
         }
       ],
       todoDone: 0,
       todoOnProcess: 0,
-      isEditing: 0
+      isEditing: 0,
+      idCount: 3
     }
   }
 
+  componentDidMount() {
+    setTimeout(() => this.checkProcess())
+  }
+
   render() {
-    const { inputText, todoList, isEditing } = this.state
+    const { inputText, todoList, isEditing, todoDone, todoOnProcess } = this.state
     return (
       <div className='ToDoList'>
         <div className='container text-center'>
@@ -49,6 +58,7 @@ export default class ToDoList extends Component {
                 inputText={inputText}
                 onChange={this.handleInputChange}
                 onAdd={this.handleAdd}
+                isEditing={isEditing}
               />
             </div>
           </div>
@@ -56,10 +66,10 @@ export default class ToDoList extends Component {
             <div className='col'>
               <div className='todo__status row  mb-2'>
                 <div className='col pr-0 text-left'>
-                  <ToDoDone />
+                  <ToDoStatus scale='done' percentage={todoDone} />
                 </div>
                 <div className='col pl-0 text-left'>
-                  <ToDoOnProcess />
+                  <ToDoStatus scale='onProcess' percentage={todoOnProcess} />
                 </div>
               </div>
               <div className='todo__list row'>
@@ -93,25 +103,29 @@ export default class ToDoList extends Component {
 
     this.setState((prevState) => ({
       ...prevState,
+      idCount: prevState.idCount + 1,
       inputText: '',
       isEditing: prevState.inputText.trim() === '' ? prevState.isEditing : false,
       todoList:
         prevState.inputText.trim() === ''
           ? prevState.todoList
           : !prevState.isEditing
-          ? prevState.todoList.concat([
+          ? [
+              ...prevState.todoList,
               {
+                id: prevState.idCount + 1,
                 title: prevState.inputText.trim(),
                 isDone: false
               }
-            ])
+            ].sort(this.sortCompletion)
           : prevState.todoList.map((item) =>
               item.id === prevState.isEditing ? { ...item, title: prevState.inputText } : item
             )
     }))
 
+    setTimeout(() => this.checkProcess())
+
     this.childRef.current.inputRef.current.focus()
-    //TODO: check process percentage
   }
 
   handleRemove = (id) => () => {
@@ -119,6 +133,8 @@ export default class ToDoList extends Component {
       ...prevState,
       todoList: prevState.todoList.filter((item) => item.id !== id)
     }))
+
+    setTimeout(() => this.checkProcess())
   }
 
   handleEdit = (id) => () => {
@@ -143,11 +159,28 @@ export default class ToDoList extends Component {
       return
     }
 
-    this.setState((prevState) => {
-      return {
-        ...prevState,
-        todoList: prevState.todoList.map((item) => (item.id === id ? { ...item, isDone: !item.isDone } : item))
-      }
-    })
+    this.setState((prevState) => ({
+      ...prevState,
+      todoList: prevState.todoList
+        .map((item) => (item.id === id ? { ...item, isDone: !item.isDone } : item))
+        .sort(this.sortCompletion)
+    }))
+
+    setTimeout(() => this.checkProcess())
   }
+
+  checkProcess = () => {
+    const doneItem = this.state.todoList.filter((item) => item.isDone)
+    const done = this.state.todoList.length
+      ? Math.round((doneItem.length / this.state.todoList.length + Number.EPSILON) * 100)
+      : 0
+    const onProcess = this.state.todoList.length ? 100 - done : 0
+    this.setState((prevState) => ({
+      ...prevState,
+      todoDone: done,
+      todoOnProcess: onProcess
+    }))
+  }
+
+  sortCompletion = (a, b) => Number(a.isDone) - Number(b.isDone)
 }

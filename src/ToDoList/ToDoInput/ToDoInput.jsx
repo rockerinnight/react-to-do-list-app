@@ -8,7 +8,7 @@ export default class ToDoInput extends Component {
     this.inputRef = createRef()
   }
   render() {
-    const { inputText, onChange, onAdd } = this.props
+    const { inputText, onChange, onAdd, isEditing } = this.props
     return (
       <form className='ToDoInput' onSubmit={onAdd}>
         <input
@@ -20,7 +20,7 @@ export default class ToDoInput extends Component {
           placeholder='What is your next task?'
         />
         <button type='submit' className='btn__add'>
-          Add
+          {isEditing ? 'Update' : 'Add'}
         </button>
       </form>
     )
