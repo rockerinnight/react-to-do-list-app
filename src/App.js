@@ -1,7 +1,12 @@
-import './App.css'
+import './App.scss'
+import ToDoList from './ToDoList/ToDoList.jsx'
 
 function App() {
-  return <div className='App'>Hello World</div>
+  return (
+    <div className='App'>
+      <ToDoList />
+    </div>
+  )
 }
 
 export default App
